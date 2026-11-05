@@ -1,4 +1,11 @@
-import { getAllInterviewReports, generateInterviewReport, getInterviewReportById, generateResumePdf } from "../services/interview.api"
+import {
+    getAllInterviewReports,
+    generateInterviewReport,
+    getInterviewReportById,
+    generateResumePdf,
+    getResumeData,
+    updateResumeData
+} from "../services/interview.api"
 import { useContext, useEffect } from "react"
 import { InterviewContext } from "../interview.context"
 import { useParams } from "react-router"
@@ -16,34 +23,52 @@ export const useInterview = () => {
     const { loading, setLoading, report, setReport, reports, setReports } = context
 
     const generateReport = async ({ jobDescription, selfDescription, resumeFile }) => {
-        setLoading(true)
-        let response = null
+        setLoading(true);
+
         try {
-            response = await generateInterviewReport({ jobDescription, selfDescription, resumeFile })
-            setReport(response.interviewReport)
+            const response = await generateInterviewReport({
+                jobDescription,
+                selfDescription,
+                resumeFile
+            });
+
+            console.log("Interview API response:", response);
+
+            setReport(response.interviewReport);
+
+            return response.interviewReport;
+
         } catch (error) {
-            console.log(error)
+            console.error("Interview generation failed:", error.response?.data || error);
+
+            return null;
+
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-
-        return response.interviewReport
-    }
-
+    };
     const getReportById = async (interviewId) => {
-        setLoading(true)
-        let response = null
-        try {
-            response = await getInterviewReportById(interviewId)
-            setReport(response.interviewReport)
-        } catch (error) {
-            console.log(error)
-        } finally {
-            setLoading(false)
-        }
-        return response.interviewReport
-    }
+        setLoading(true);
 
+        try {
+            const response = await getInterviewReportById(interviewId);
+
+            setReport(response.interviewReport);
+
+            return response.interviewReport;
+
+        } catch (error) {
+            console.error(
+                "Fetching interview report failed:",
+                error.response?.data || error
+            );
+
+            return null;
+
+        } finally {
+            setLoading(false);
+        }
+    };
     const getReports = async () => {
         setLoading(true)
         let response = null
@@ -64,7 +89,7 @@ export const useInterview = () => {
         let response = null
         try {
             response = await generateResumePdf({ interviewReportId })
-            const url = window.URL.createObjectURL(new Blob([ response ], { type: "application/pdf" }))
+            const url = window.URL.createObjectURL(new Blob([response], { type: "application/pdf" }))
             const link = document.createElement("a")
             link.href = url
             link.setAttribute("download", `resume_${interviewReportId}.pdf`)
@@ -78,14 +103,47 @@ export const useInterview = () => {
         }
     }
 
+    const fetchEditableResume = async (interviewReportId) => {
+    try {
+        const response = await getResumeData(interviewReportId)
+        return response.resumeData
+    } catch (error) {
+        console.error("Fetching resume failed:", error.response?.data || error)
+        return null
+    }
+}
+
+const saveEditableResume = async (interviewReportId, resumeData) => {
+    try {
+        const response = await updateResumeData({
+            interviewReportId,
+            resumeData
+        })
+
+        return response.resumeData
+    } catch (error) {
+        console.error("Saving resume failed:", error.response?.data || error)
+        return null
+    }
+}
+
     useEffect(() => {
         if (interviewId) {
             getReportById(interviewId)
         } else {
             getReports()
         }
-    }, [ interviewId ])
+    }, [interviewId])
 
-    return { loading, report, reports, generateReport, getReportById, getReports, getResumePdf }
-
+   return {
+    loading,
+    report,
+    reports,
+    generateReport,
+    getReportById,
+    getReports,
+    getResumePdf,
+    fetchEditableResume,
+    saveEditableResume
+}
 }

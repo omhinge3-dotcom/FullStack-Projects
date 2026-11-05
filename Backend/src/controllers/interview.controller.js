@@ -1,5 +1,9 @@
 const pdfParse = require("pdf-parse")
-const { generateInterviewReport, generateResumePdf } = require("../services/ai.service")
+const {
+    generateInterviewReport,
+    generateResumePdf,
+    generateEditableResumeData
+} = require("../services/ai.service")
 const interviewReportModel = require("../models/interviewReport.model")
 
 
@@ -19,11 +23,18 @@ async function generateInterViewReportController(req, res) {
         jobDescription
     })
 
+    const resumeData = await generateEditableResumeData({
+        resume: resumeContent.text,
+        selfDescription,
+        jobDescription
+    })
+
     const interviewReport = await interviewReportModel.create({
         user: req.user.id,
         resume: resumeContent.text,
         selfDescription,
         jobDescription,
+        resumeData,
         ...interViewReportByAi
     })
 
@@ -72,10 +83,59 @@ async function getAllInterviewReportsController(req, res) {
 /**
  * @description Controller to generate resume PDF based on user self description, resume and job description.
  */
+
 async function generateResumePdfController(req, res) {
+    try {
+        const { interviewReportId } = req.params
+
+        const interviewReport = await interviewReportModel.findOne({
+            _id: interviewReportId,
+            user: req.user.id
+        })
+
+        if (!interviewReport) {
+            return res.status(404).json({
+                message: "Interview report not found."
+            })
+        }
+
+        if (!interviewReport.resumeData) {
+            return res.status(400).json({
+                message: "Resume data not found. Please generate a new resume."
+            })
+        }
+
+        // Generate PDF using the latest saved and edited resume data.
+        const pdfBuffer = await generateResumePdf({
+            resumeData: interviewReport.resumeData
+        })
+
+        res.set({
+            "Content-Type": "application/pdf",
+            "Content-Disposition": `attachment; filename=resume_${interviewReportId}.pdf`
+        })
+
+        return res.send(pdfBuffer)
+
+    } catch (error) {
+        console.error("Resume PDF generation error:", error)
+
+        return res.status(500).json({
+            message: "Failed to generate resume PDF."
+        })
+    }
+}
+
+/**
+ * Get editable resume data.
+ */
+async function getResumeDataController(req, res) {
     const { interviewReportId } = req.params
 
-    const interviewReport = await interviewReportModel.findById(interviewReportId)
+    const interviewReport = await interviewReportModel.findOne({
+        _id: interviewReportId,
+        user: req.user.id
+    })
 
     if (!interviewReport) {
         return res.status(404).json({
@@ -83,16 +143,51 @@ async function generateResumePdfController(req, res) {
         })
     }
 
-    const { resume, jobDescription, selfDescription } = interviewReport
-
-    const pdfBuffer = await generateResumePdf({ resume, jobDescription, selfDescription })
-
-    res.set({
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename=resume_${interviewReportId}.pdf`
+    res.status(200).json({
+        message: "Resume data fetched successfully.",
+        resumeData: interviewReport.resumeData
     })
-
-    res.send(pdfBuffer)
 }
 
-module.exports = { generateInterViewReportController, getInterviewReportByIdController, getAllInterviewReportsController, generateResumePdfController }
+
+/**
+ * Update editable resume data.
+ */
+async function updateResumeDataController(req, res) {
+    const { interviewReportId } = req.params
+    const { resumeData } = req.body
+
+    if (!resumeData || typeof resumeData !== "object") {
+        return res.status(400).json({
+            message: "Valid resume data is required."
+        })
+    }
+
+    const interviewReport = await interviewReportModel.findOne({
+        _id: interviewReportId,
+        user: req.user.id
+    })
+
+    if (!interviewReport) {
+        return res.status(404).json({
+            message: "Interview report not found."
+        })
+    }
+
+    interviewReport.resumeData = resumeData
+    await interviewReport.save()
+
+    res.status(200).json({
+        message: "Resume updated successfully.",
+        resumeData: interviewReport.resumeData
+    })
+}
+
+module.exports = {
+    generateInterViewReportController,
+    getInterviewReportByIdController,
+    getAllInterviewReportsController,
+    generateResumePdfController,
+    getResumeDataController,
+    updateResumeDataController
+}

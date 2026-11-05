@@ -1,0 +1,147 @@
+.profile-page {
+    min-height: 100vh;
+    width: 100%;
+    background: #0d1117;
+    color: #e6edf3;
+    padding: 25px 5%;
+    box-sizing: border-box;
+}
+
+.profile-page__header {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto 60px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+
+    h2 {
+        color: #ff2d78;
+        font-size: 20px;
+        margin: 0;
+    }
+}
+
+.profile-card {
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 35px;
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+
+    background: #161b22;
+    border: 1px solid #2a3348;
+    border-radius: 16px;
+    text-align: center;
+}
+
+.profile-card__avatar {
+    width: 85px;
+    height: 85px;
+    flex-shrink: 0;
+
+    display: grid;
+    place-items: center;
+
+    align-self: center;
+    margin: 0 auto 18px;
+
+    background: #ff2d78;
+    border-radius: 50%;
+    color: white;
+    font-size: 36px;
+    font-weight: 700;
+}
+
+.profile-card h1 {
+    width: 100%;
+    margin: 0 0 8px;
+    font-size: 28px;
+    color: #e6edf3;
+}
+
+.profile-card__subtitle {
+    width: 100%;
+    margin: 0 0 30px;
+    color: #7d8590;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.profile-card__details {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.profile-card__field {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 15px 0;
+    border-bottom: 1px solid #2a3348;
+
+    label {
+        display: block;
+        color: #7d8590;
+        font-size: 13px;
+        margin-bottom: 7px;
+    }
+
+    p {
+        display: block;
+        width: 100%;
+        margin: 0;
+        color: #e6edf3;
+        font-size: 15px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+}
+
+.profile-card__back {
+    width: 100%;
+    margin-top: 25px;
+    padding: 13px;
+
+    background: #ff2d78;
+    border: none;
+    border-radius: 8px;
+
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 0.9;
+    }
+}
+
+@media (max-width: 600px) {
+    .profile-page {
+        padding: 18px;
+    }
+
+    .profile-page__header {
+        margin-bottom: 40px;
+
+        h2 {
+            font-size: 16px;
+        }
+    }
+
+    .profile-card {
+        padding: 24px 20px;
+    }
+
+    .profile-card h1 {
+        font-size: 24px;
+    }
+}

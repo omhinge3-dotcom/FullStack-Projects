@@ -29,6 +29,20 @@ interviewRouter.get("/report/:interviewId", authMiddleware.authUser, interviewCo
  */
 interviewRouter.get("/", authMiddleware.authUser, interviewController.getAllInterviewReportsController)
 
+// Get editable resume data
+interviewRouter.get(
+    "/resume/data/:interviewReportId",
+    authMiddleware.authUser,
+    interviewController.getResumeDataController
+)
+
+// Update editable resume data
+interviewRouter.put(
+    "/resume/data/:interviewReportId",
+    authMiddleware.authUser,
+    interviewController.updateResumeDataController
+)
+
 
 /**
  * @route GET /api/interview/resume/pdf

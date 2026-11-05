@@ -1,3 +1,4 @@
+import AccountMenu from "../../auth/components/AccountMenu";
 import React, { useState, useEffect } from 'react'
 import '../style/interview.scss'
 import { useInterview } from '../hooks/useInterview.js'
@@ -13,7 +14,7 @@ const NAV_ITEMS = [
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 const QuestionCard = ({ item, index }) => {
-    const [ open, setOpen ] = useState(false)
+    const [open, setOpen] = useState(false)
     return (
         <div className='q-card'>
             <div className='q-card__header' onClick={() => setOpen(o => !o)}>
@@ -58,16 +59,108 @@ const RoadMapDay = ({ day }) => (
 
 // ── Main Component ────────────────────────────────────────────────────────────
 const Interview = () => {
-    const [ activeNav, setActiveNav ] = useState('technical')
-    const { report, getReportById, loading, getResumePdf } = useInterview()
+    const [activeNav, setActiveNav] = useState('technical')
+    const {
+        report,
+        getReportById,
+        loading,
+        fetchEditableResume,
+        saveEditableResume,
+        getResumePdf
+    } = useInterview()
     const { interviewId } = useParams()
-
+    const [resumeData, setResumeData] = useState(null)
+    const [resumeLoading, setResumeLoading] = useState(false)
+    const [resumeError, setResumeError] = useState("")
+    const [isEditing, setIsEditing] = useState(false)
+    const [resumeSaving, setResumeSaving] = useState(false)
     useEffect(() => {
         if (interviewId) {
             getReportById(interviewId)
         }
-    }, [ interviewId ])
+    }, [interviewId])
 
+    const handlePreviewResume = async () => {
+        setResumeLoading(true)
+        setResumeError("")
+
+        try {
+            const data = await fetchEditableResume(interviewId)
+
+            if (!data) {
+                setResumeError(
+                    "Resume data not found. Please generate a new interview report."
+                )
+                return
+            }
+
+            setResumeData(data)
+            setIsEditing(false)
+            setActiveNav("resume")
+        } catch (error) {
+            setResumeError("Unable to load resume preview.")
+            console.error(error)
+        } finally {
+            setResumeLoading(false)
+        }
+    }
+
+    const updatePersonalDetail = (field, value) => {
+        setResumeData(prev => ({
+            ...prev,
+            personalDetails: {
+                ...prev.personalDetails,
+                [field]: value
+            }
+        }))
+    }
+
+    const updateSummary = (value) => {
+        setResumeData(prev => ({
+            ...prev,
+            professionalSummary: value
+        }))
+    }
+
+    const updateArrayField = (section, index, field, value) => {
+        setResumeData(prev => {
+            const updatedArray = [...(prev[section] || [])]
+
+            updatedArray[index] = {
+                ...updatedArray[index],
+                [field]: ["items", "technologies"].includes(field)
+                    ? value.split(",").map(item => item.trim()).filter(Boolean)
+                    : value
+            }
+
+            return {
+                ...prev,
+                [section]: updatedArray
+            }
+        })
+    }
+
+    const handleSaveResume = async () => {
+        setResumeSaving(true)
+
+        try {
+            const savedData = await saveEditableResume(interviewId, resumeData)
+
+            if (!savedData) {
+                alert("Unable to save resume. Please try again.")
+                return
+            }
+
+            setResumeData(savedData)
+            setIsEditing(false)
+            alert("Resume updated successfully!")
+        } catch (error) {
+            console.error(error)
+            alert("Failed to save resume.")
+        } finally {
+            setResumeSaving(false)
+        }
+    }
 
 
     if (loading || !report) {
@@ -83,9 +176,15 @@ const Interview = () => {
             report.matchScore >= 60 ? 'score--mid' : 'score--low'
 
 
-    return (
-        <div className='interview-page'>
-            <div className='interview-layout'>
+ return (
+    <div className='interview-page'>
+
+        <header className="interview-topbar">
+            <h2>AI Interview Platform</h2>
+            <AccountMenu />
+        </header>
+
+        <div className='interview-layout'>
 
                 {/* ── Left Nav ── */}
                 <nav className='interview-nav'>
@@ -103,10 +202,11 @@ const Interview = () => {
                         ))}
                     </div>
                     <button
-                        onClick={() => { getResumePdf(interviewId) }}
-                        className='button primary-button' >
-                        <svg height={"0.8rem"} style={{ marginRight: "0.8rem" }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.6144 17.7956 11.492 15.7854C12.2731 13.9966 13.6789 12.5726 15.4325 11.7942L17.8482 10.7219C18.6162 10.381 18.6162 9.26368 17.8482 8.92277L15.5079 7.88394C13.7092 7.08552 12.2782 5.60881 11.5105 3.75894L10.6215 1.61673C10.2916.821765 9.19319.821767 8.8633 1.61673L7.97427 3.75892C7.20657 5.60881 5.77553 7.08552 3.97685 7.88394L1.63658 8.92277C.868537 9.26368.868536 10.381 1.63658 10.7219L4.0523 11.7942C5.80589 12.5726 7.21171 13.9966 7.99275 15.7854L8.8704 17.7956C9.20776 18.5682 10.277 18.5682 10.6144 17.7956ZM19.4014 22.6899 19.6482 22.1242C20.0882 21.1156 20.8807 20.3125 21.8695 19.8732L22.6299 19.5353C23.0412 19.3526 23.0412 18.7549 22.6299 18.5722L21.9121 18.2532C20.8978 17.8026 20.0911 16.9698 19.6586 15.9269L19.4052 15.3156C19.2285 14.8896 18.6395 14.8896 18.4628 15.3156L18.2094 15.9269C17.777 16.9698 16.9703 17.8026 15.956 18.2532L15.2381 18.5722C14.8269 18.7549 14.8269 19.3526 15.2381 19.5353L15.9985 19.8732C16.9874 20.3125 17.7798 21.1156 18.2198 22.1242L18.4667 22.6899C18.6473 23.104 19.2207 23.104 19.4014 22.6899Z"></path></svg>
-                        Download Resume
+                        onClick={handlePreviewResume}
+                        disabled={resumeLoading}
+                        className='button primary-button'
+                    >
+                        {resumeLoading ? "Loading Resume..." : "Preview & Edit Resume"}
                     </button>
                 </nav>
 
@@ -139,6 +239,271 @@ const Interview = () => {
                                     <QuestionCard key={i} item={q} index={i} />
                                 ))}
                             </div>
+                        </section>
+                    )}
+
+                    {activeNav === 'resume' && resumeData && (
+                        <section className="resume-preview">
+
+                            <div className="content-header">
+                                <h2>{isEditing ? "Edit Resume" : "Resume Preview"}</h2>
+
+                                <div className="resume-actions">
+                                    {isEditing ? (
+                                        <>
+                                            <button
+                                                className="button primary-button"
+                                                onClick={handleSaveResume}
+                                                disabled={resumeSaving}
+                                            >
+                                                {resumeSaving ? "Saving..." : "Save Changes"}
+                                            </button>
+
+                                            <button
+                                                className="button"
+                                                onClick={() => setIsEditing(false)}
+                                            >
+                                                Cancel
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button
+                                                className="button primary-button"
+                                                onClick={() => setIsEditing(true)}
+                                            >
+                                                Edit Resume
+                                            </button>
+
+                                            <button
+                                                className="button primary-button"
+                                                onClick={() => getResumePdf(interviewId)}
+                                            >
+                                                Download PDF
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            {isEditing ? (
+                                <div className="resume-editor">
+
+                                    <h3>Personal Details</h3>
+
+                                    {[
+                                        ["fullName", "Full Name"],
+                                        ["email", "Email"],
+                                        ["phone", "Phone"],
+                                        ["location", "Location"],
+                                        ["linkedin", "LinkedIn"],
+                                        ["github", "GitHub"]
+                                    ].map(([field, label]) => (
+                                        <label className="resume-edit-field" key={field}>
+                                            {label}
+                                            <input
+                                                value={resumeData.personalDetails?.[field] || ""}
+                                                onChange={e =>
+                                                    updatePersonalDetail(field, e.target.value)
+                                                }
+                                            />
+                                        </label>
+                                    ))}
+
+                                    <h3>Professional Summary</h3>
+
+                                    <textarea
+                                        className="resume-edit-textarea"
+                                        value={resumeData.professionalSummary || ""}
+                                        onChange={e => updateSummary(e.target.value)}
+                                    />
+
+                                    <h3>Skills</h3>
+
+                                    {(resumeData.skills || []).map((item, index) => (
+                                        <div className="resume-edit-card" key={index}>
+                                            <label className="resume-edit-field">
+                                                Category
+                                                <input
+                                                    value={item.category || ""}
+                                                    onChange={e =>
+                                                        updateArrayField(
+                                                            "skills", index, "category", e.target.value
+                                                        )
+                                                    }
+                                                />
+                                            </label>
+
+                                            <label className="resume-edit-field">
+                                                Skills (comma separated)
+                                                <textarea
+                                                    value={(item.items || []).join(", ")}
+                                                    onChange={e =>
+                                                        updateArrayField(
+                                                            "skills", index, "items", e.target.value
+                                                        )
+                                                    }
+                                                />
+                                            </label>
+                                        </div>
+                                    ))}
+
+                                    <h3>Education</h3>
+
+                                    {(resumeData.education || []).map((item, index) => (
+                                        <div className="resume-edit-card" key={index}>
+                                            {["degree", "institution", "graduationYear", "cgpa"].map(field => (
+                                                <label className="resume-edit-field" key={field}>
+                                                    {field}
+                                                    <input
+                                                        value={item[field] || ""}
+                                                        onChange={e =>
+                                                            updateArrayField(
+                                                                "education", index, field, e.target.value
+                                                            )
+                                                        }
+                                                    />
+                                                </label>
+                                            ))}
+                                        </div>
+                                    ))}
+
+                                    <h3>Projects</h3>
+
+                                    {(resumeData.projects || []).map((item, index) => (
+                                        <div className="resume-edit-card" key={index}>
+                                            {["name", "description"].map(field => (
+                                                <label className="resume-edit-field" key={field}>
+                                                    {field}
+                                                    <textarea
+                                                        value={item[field] || ""}
+                                                        onChange={e =>
+                                                            updateArrayField(
+                                                                "projects", index, field, e.target.value
+                                                            )
+                                                        }
+                                                    />
+                                                </label>
+                                            ))}
+
+                                            <label className="resume-edit-field">
+                                                Technologies (comma separated)
+                                                <textarea
+                                                    value={(item.technologies || []).join(", ")}
+                                                    onChange={e =>
+                                                        updateArrayField(
+                                                            "projects", index, "technologies", e.target.value
+                                                        )
+                                                    }
+                                                />
+                                            </label>
+                                        </div>
+                                    ))}
+
+                                    <h3>Experience</h3>
+
+                                    {(resumeData.experience || []).map((item, index) => (
+                                        <div className="resume-edit-card" key={index}>
+                                            {["role", "organization", "duration", "description"].map(field => (
+                                                <label className="resume-edit-field" key={field}>
+                                                    {field}
+                                                    <textarea
+                                                        value={item[field] || ""}
+                                                        onChange={e =>
+                                                            updateArrayField(
+                                                                "experience", index, field, e.target.value
+                                                            )
+                                                        }
+                                                    />
+                                                </label>
+                                            ))}
+                                        </div>
+                                    ))}
+
+                                    <h3>Certifications</h3>
+
+                                    {(resumeData.certifications || []).map((item, index) => (
+                                        <div className="resume-edit-card" key={index}>
+                                            {["name", "issuer"].map(field => (
+                                                <label className="resume-edit-field" key={field}>
+                                                    {field}
+                                                    <input
+                                                        value={item[field] || ""}
+                                                        onChange={e =>
+                                                            updateArrayField(
+                                                                "certifications", index, field, e.target.value
+                                                            )
+                                                        }
+                                                    />
+                                                </label>
+                                            ))}
+                                        </div>
+                                    ))}
+
+                                </div>
+                            ) : (
+
+                                <div className="resume-paper">
+
+                                    <h1>{resumeData.personalDetails?.fullName}</h1>
+
+                                    <p>
+                                        {resumeData.personalDetails?.email} |
+                                        {resumeData.personalDetails?.phone}
+                                    </p>
+
+                                    <p>{resumeData.personalDetails?.location}</p>
+                                    <p>{resumeData.personalDetails?.linkedin}</p>
+                                    <p>{resumeData.personalDetails?.github}</p>
+
+                                    <h3>Professional Summary</h3>
+                                    <p>{resumeData.professionalSummary}</p>
+
+                                    <h3>Skills</h3>
+                                    {(resumeData.skills || []).map((item, index) => (
+                                        <p key={index}>
+                                            <strong>{item.category}: </strong>
+                                            {(item.items || []).join(", ")}
+                                        </p>
+                                    ))}
+
+                                    <h3>Education</h3>
+                                    {(resumeData.education || []).map((item, index) => (
+                                        <div key={index}>
+                                            <strong>{item.degree}</strong>
+                                            <p>{item.institution}</p>
+                                            <p>{item.graduationYear} | {item.cgpa}</p>
+                                        </div>
+                                    ))}
+
+                                    <h3>Projects</h3>
+                                    {(resumeData.projects || []).map((item, index) => (
+                                        <div key={index}>
+                                            <strong>{item.name}</strong>
+                                            <p>{item.description}</p>
+                                            <p>{(item.technologies || []).join(", ")}</p>
+                                        </div>
+                                    ))}
+
+                                    <h3>Experience</h3>
+                                    {(resumeData.experience || []).map((item, index) => (
+                                        <div key={index}>
+                                            <strong>{item.role}</strong>
+                                            <p>{item.organization} | {item.duration}</p>
+                                            <p>{item.description}</p>
+                                        </div>
+                                    ))}
+
+                                    <h3>Certifications</h3>
+                                    {(resumeData.certifications || []).map((item, index) => (
+                                        <p key={index}>
+                                            {item.name} - {item.issuer}
+                                        </p>
+                                    ))}
+
+                                </div>
+                            )}
+
                         </section>
                     )}
 

@@ -477,3 +477,110 @@ $severity-low: #3fb950;
         border-color: rgba($severity-low, 0.25);
     }
 }
+
+.resume-preview {
+    width: 100%;
+
+    .resume-paper {
+        background: #ffffff;
+        color: #222222;
+        padding: 2.5rem;
+        border-radius: 0.4rem;
+        max-width: 800px;
+        margin: 1.5rem auto;
+        line-height: 1.6;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+
+        h1 {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 0.3rem;
+        }
+
+        h1 + p {
+            text-align: center;
+        }
+
+        h3 {
+            color: #222222;
+            font-size: 1rem;
+            border-bottom: 1px solid #333333;
+            padding-bottom: 0.3rem;
+            margin-top: 1.5rem;
+        }
+
+        p {
+            font-size: 0.85rem;
+            margin: 0.3rem 0;
+            overflow-wrap: anywhere;
+        }
+    }
+}
+
+.resume-actions {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.resume-editor {
+    padding: 1.5rem;
+    background: #ffffff;
+    color: #222;
+    border-radius: 8px;
+    margin-top: 1.5rem;
+
+    h3 {
+        margin: 1.5rem 0 0.8rem;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 0.5rem;
+    }
+}
+
+.resume-edit-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+
+    input,
+    textarea {
+        width: 100%;
+        padding: 0.7rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        color: #222;
+        background: #fff;
+        font: inherit;
+        font-weight: 400;
+        box-sizing: border-box;
+    }
+
+    textarea {
+        min-height: 75px;
+        resize: vertical;
+    }
+}
+
+.resume-edit-card {
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+}
+
+.interview-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 28px;
+    background: #0d1117;
+    border-bottom: 1px solid #2a3348;
+
+    h2 {
+        color: #ff2d78;
+        font-size: 20px;
+    }
+}

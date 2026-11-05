@@ -1,3 +1,4 @@
+import AccountMenu from "../../auth/components/AccountMenu";
 import React, { useState, useRef } from 'react'
 import "../style/home.scss"
 import { useInterview } from '../hooks/useInterview.js'
@@ -5,18 +6,39 @@ import { useNavigate } from 'react-router'
 
 const Home = () => {
 
-    const { loading, generateReport,reports } = useInterview()
-    const [ jobDescription, setJobDescription ] = useState("")
-    const [ selfDescription, setSelfDescription ] = useState("")
+    const { loading, generateReport, reports } = useInterview()
+    const [jobDescription, setJobDescription] = useState("")
+    const [selfDescription, setSelfDescription] = useState("")
+    const [selectedResume, setSelectedResume] = useState(null)
     const resumeInputRef = useRef()
 
     const navigate = useNavigate()
 
     const handleGenerateReport = async () => {
-        const resumeFile = resumeInputRef.current.files[ 0 ]
-        const data = await generateReport({ jobDescription, selfDescription, resumeFile })
-        navigate(`/interview/${data._id}`)
-    }
+        const resumeFile = resumeInputRef.current.files[0];
+
+        if (!jobDescription.trim()) {
+            alert("Please enter the Target Job Description.");
+            return;
+        }
+
+        if (!resumeFile && !selfDescription.trim()) {
+            alert("Please upload a resume or enter your self-description.");
+            return;
+        }
+
+        const data = await generateReport({
+            jobDescription,
+            selfDescription,
+            resumeFile
+        });
+
+        if (data?._id) {
+            navigate(`/interview/${data._id}`);
+        } else {
+            alert("Interview generation failed. Check the console and backend terminal.");
+        }
+    };
 
     if (loading) {
         return (
@@ -28,6 +50,10 @@ const Home = () => {
 
     return (
         <div className='home-page'>
+            <header className="app-topbar">
+                <h2 className="app-topbar__brand">AI Interview Platform</h2>
+                <AccountMenu />
+            </header>
 
             {/* Page Header */}
             <header className='page-header'>
@@ -81,7 +107,32 @@ const Home = () => {
                                 </span>
                                 <p className='dropzone__title'>Click to upload or drag &amp; drop</p>
                                 <p className='dropzone__subtitle'>PDF or DOCX (Max 5MB)</p>
-                                <input ref={resumeInputRef} hidden type='file' id='resume' name='resume' accept='.pdf,.docx' />
+                                <input
+                                    ref={resumeInputRef}
+                                    hidden
+                                    type='file'
+                                    id='resume'
+                                    name='resume'
+                                    accept='.pdf,.docx'
+                                    onChange={(e) => {
+                                        const file = e.target.files[0]
+
+                                        if (file && file.size > 5 * 1024 * 1024) {
+                                            alert("File size must be less than 5 MB")
+                                            e.target.value = ""
+                                            setSelectedResume(null)
+                                            return
+                                        }
+
+                                        setSelectedResume(file || null)
+                                    }}
+                                />
+
+                                {selectedResume && (
+                                    <p className="selected-file">
+                                        Selected: {selectedResume.name}
+                                    </p>
+                                )}
                             </label>
                         </div>
 

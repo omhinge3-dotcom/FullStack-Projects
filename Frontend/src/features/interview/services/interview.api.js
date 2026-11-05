@@ -57,3 +57,27 @@ export const generateResumePdf = async ({ interviewReportId }) => {
 
     return response.data
 }
+
+/**
+ * Get editable resume data.
+ */
+export const getResumeData = async (interviewReportId) => {
+    const response = await api.get(
+        `/api/interview/resume/data/${interviewReportId}`
+    )
+
+    return response.data
+}
+
+
+/**
+ * Save edited resume data.
+ */
+export const updateResumeData = async ({ interviewReportId, resumeData }) => {
+    const response = await api.put(
+        `/api/interview/resume/data/${interviewReportId}`,
+        { resumeData }
+    )
+
+    return response.data
+}
