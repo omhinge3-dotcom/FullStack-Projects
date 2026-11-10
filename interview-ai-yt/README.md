@@ -15,7 +15,7 @@ Users can preview their generated resumes, edit different sections, save their c
 - **Resume Preview:** Preview generated resume content directly in the application.
 - **Editable Resume:** Edit personal details, professional summary, skills, education, projects, experience, and certifications.
 - **Save Resume:** Store updated resume information in MongoDB.
-- **PDF Generation:** Generate and download a PDF using the saved resume data.
+- **PDF Generation:** Generate and download a PDF using saved resume data.
 - **User Authentication:** Register, log in, and log out securely.
 - **Profile Management:** View account information through a dedicated profile page.
 
@@ -60,7 +60,6 @@ interview-ai-yt/
 ├── Frontend/
 │   ├── src/
 │   │   ├── features/
-│   │   ├── components/
 │   │   └── ...
 │   ├── package.json
 │   └── ...
@@ -96,7 +95,7 @@ Install dependencies:
 npm install
 ```
 
-Create a `.env` file and configure the required environment variables, including your MongoDB connection, JWT secret, and Gemini API key. Use the exact variable names expected by the backend configuration.
+Create a `.env` file and configure the required environment variables, including your MongoDB connection string, JWT secret, and Gemini API key. Use the exact variable names expected by your backend configuration.
 
 Start the backend:
 
@@ -106,7 +105,7 @@ npm run dev
 
 ### 3. Frontend Setup
 
-Open another terminal and navigate to the Frontend folder:
+Open another terminal and navigate to the project directory:
 
 ```bash
 cd FullStack-Projects/interview-ai-yt/Frontend
@@ -144,7 +143,7 @@ Open the local URL displayed by Vite in your browser.
 - Server-side ownership checks for resume data.
 - Environment variables for sensitive credentials.
 
-Never commit API keys, database credentials, JWT secrets, or `.env` files to GitHub.
+**Important:** Never commit API keys, database credentials, JWT secrets, or `.env` files to GitHub.
 
 ## Future Improvements
 
