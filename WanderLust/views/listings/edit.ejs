@@ -1,0 +1,85 @@
+<% layout("/layouts/boilerplate.ejs")%>
+
+
+    <div class="row mt-3">
+        <div class="col-8 offset-2">
+            <h3>Edit your Listing</h3>
+            <form method="POST" action="/listings/<%= listing._id%>?_method=PUT" novalidate class="needs-validation"
+                enctype="multipart/form-data">
+
+                <div class="mb-3">
+                    <label for="title" class="form-lable">Title</label>
+                    <input id="title" class="form-control" type="text" name="listing[title]" value="<%= listing.title%>"
+                        required>
+                    <div class="valid-feedback">Title looks good</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-lable">Description</label>
+                    <textarea id="description" class="form-control" name="listing[description]"
+                        required><%= listing.description%></textarea>
+                    <div class="invalid-feedback">Please enter a short description</div>
+                </div>
+
+                <div class="mb-3">
+                    Original Listing Image <br>
+                    <img src="<%= originalImageUrl %>" alt="" height="200px" width="300px">
+                </div>
+
+                <div class="mb-3">
+                    <label for="image" class="form-lable">Upload New Image</label>
+                    <input id="image" class="form-control" type="file" name="listing[image]"
+                        value="<%= listing.image.url%>">
+                </div>
+
+                <div class="row">
+                    <div class="mb-3 col-md-4">
+                        <label for="price" class="form-lable">Price</label>
+                        <input id="price" class="form-control" type="number" name="listing[price]"
+                            value="<%= listing.price%>" required>
+                        <div class="invalid-feedback">Price should be valid</div>
+                    </div>
+
+                    <div class="mb-3 col-md-8">
+                        <label for="location" class="form-lable">Location</label>
+                        <input id="location" class="form-control" type="text" name="listing[location]"
+                            value="<%= listing.location%>" required>
+                        <div class="invalid-feedback">Location should be valid</div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="country" class="form-lable">Country</label>
+                    <input id="country" class="form-control" type="text" name="listing[country]"
+                        value="<%= listing.country%>" required>
+                    <div class="invalid-feedback">Country should be valid</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Select Categories</label>
+
+                    <% const categories=[ "Beach" , "Desert" , "Mountains" , "Forest" , "Farms" , "Arctic" , "Castles"
+                        , "Amazing Pools" , "Camping" , "Iconic Cities" ]; %>
+
+                        <div class="row">
+                            <% categories.forEach(category=> { %>
+                                <div class="col-md-4 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="listing[categories]"
+                                            value="<%= category %>" id="edit-<%= category.replace(/\s+/g, '-') %>"
+                                            <%=listing.categories && listing.categories.includes(category) ? "checked"
+                                            : "" %>
+                                        >
+                                        <label class="form-check-label" for="edit-<%= category.replace(/\s+/g, '-') %>">
+                                            <%= category %>
+                                        </label>
+                                    </div>
+                                </div>
+                                <% }) %>
+                        </div>
+                </div>
+
+                <button class="btn btn-dark edit-btn mt-3 mb-3">Edit</button>
+
+        </div>
+    </div>
