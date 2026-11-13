@@ -5,6 +5,7 @@
         border-radius: 1.5rem;
         padding: 0.5rem 1rem;
         white-space: nowrap;
+        flex-shrink: 0;
     }
 
     .search-btn:hover {
@@ -25,12 +26,73 @@
 
     .navbar-brand {
         font-size: 1.5rem;
+        flex-shrink: 0;
     }
 
+    /* Common navbar layout */
+    .navbar>.container-fluid {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .navbar-search form {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+        margin: 0;
+    }
+
+    .navbar-search .search-input {
+        flex: 1;
+        width: 100%;
+        min-width: 0;
+        margin: 0 !important;
+    }
+
+    /* Desktop layout */
+    @media (min-width: 768px) {
+        .navbar-search {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            max-width: 35%;
+        }
+
+        .navbar-collapse {
+            flex-grow: 1;
+        }
+    }
+
+    /* Mobile layout */
     @media (max-width: 767px) {
-        .navbar>.container-fluid {
-            display: flex;
-            flex-wrap: wrap;
+        .navbar-search {
+            position: static;
+            transform: none;
+            flex: 1;
+            min-width: 0;
+            margin: 0 0.5rem;
+        }
+
+        .navbar-search form {
+            gap: 0.35rem;
+        }
+
+        .navbar-search .search-input {
+            font-size: 0.8rem;
+            padding: 0.45rem 0.6rem;
+        }
+
+        .navbar-search .search-btn {
+            font-size: 0.8rem;
+            padding: 0.45rem 0.65rem;
+        }
+
+        .navbar-toggler {
+            flex-shrink: 0;
+            padding: 0.35rem 0.5rem;
         }
 
         .navbar-collapse {
@@ -51,66 +113,22 @@
         .navbar-collapse .nav-link {
             padding: 0.65rem 0.25rem;
         }
-
-
-        .navbar-search {
-            flex: 1;
-            min-width: 0;
-            margin: 0 0.5rem;
-        }
-
-        .navbar-search form {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            width: 100%;
-        }
-
-        .navbar-search .search-input {
-            flex: 1;
-            min-width: 0;
-            width: 0;
-            padding: 0.45rem 0.6rem;
-            font-size: 0.8rem;
-            margin: 0 !important;
-        }
-
-        .navbar-search .search-btn {
-            flex-shrink: 0;
-            padding: 0.45rem 0.65rem;
-            font-size: 0.8rem;
-        }
-
-        .navbar-toggler {
-            flex-shrink: 0;
-            padding: 0.35rem 0.5rem;
-        }
-
-
-        .navbar-search form {
-            display: flex;
-            width: 100%;
-        }
-
-        .navbar-search .search-input {
-            flex: 1;
-            width: 100%;
-        }
     }
 </style>
-
 
 <nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
     <div class="container-fluid">
 
+        <!-- Logo -->
         <a class="navbar-brand" href="/listings">
             <i class="fa-regular fa-compass"></i>
         </a>
 
+        <!-- Search: outside the hamburger dropdown -->
         <div class="navbar-search">
             <form role="search" action="/listings" method="GET">
-                <input class="form-control me-2 search-input" type="search" name="search"
-                    placeholder="Search destinations" value="<%= typeof search !== 'undefined' ? search : '' %>" />
+                <input class="form-control search-input" type="search" name="search" placeholder="Search destinations"
+                    value="<%= typeof search !== 'undefined' ? search : '' %>" />
 
                 <button class="btn search-btn" type="submit">
                     <i class="fa-solid fa-magnifying-glass"></i>
@@ -119,17 +137,21 @@
             </form>
         </div>
 
+        <!-- Hamburger button -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
             aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
+        <!-- Hamburger dropdown -->
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
 
+            <!-- Left navigation -->
             <div class="navbar-nav">
                 <a class="nav-link" href="/listings">Explore</a>
             </div>
 
+            <!-- Right navigation -->
             <div class="navbar-nav ms-md-auto">
                 <a class="nav-link" href="/listings/new">Airbnb your home</a>
 
